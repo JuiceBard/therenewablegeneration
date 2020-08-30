@@ -238,7 +238,7 @@ var State0_0 = {
 };
 
 function setup() {// Setup function
-    canv = createCanvas(innerWidth, innerHeight);       // Generate canvas
+    canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
     frameRate(30);                                              // Set frame rate
 
     tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
@@ -252,7 +252,7 @@ function setup() {// Setup function
 function draw() { //Looping draw function (called each frame)
     push();
 
-    clear();                                                      //Initial settings
+    clear();                                                    //Initial settings
     background(255);
     stroke(0);
 
@@ -260,7 +260,7 @@ function draw() { //Looping draw function (called each frame)
 
 
     if (t != null) {
-        rotate(-PI);                                         //Check if tree (stored in the t variable) is generated
+        rotate(-PI);                                            //Check if tree (stored in the t variable) is generated
         t.display();                                            //If so, call the display function
 
         if (frameCount > t.transition.endFrame) {               // Check if the tree is not in the middle of an animation
@@ -314,7 +314,7 @@ function change_tree() { //Function, that gets called when the button is pressed
 }
 
 function windowResized() {  //Function, that gets called when the window is resized
-    canv = resizeCanvas(innerWidth - 5, innerHeight - 5);       //Resize the canvas
+    canv = resizeCanvas(innerWidth, innerHeight);               //Resize the canvas
 
     tf_w = width / 1.5;
     tf_h = height;
