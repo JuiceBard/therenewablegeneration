@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8">
+  <head>
+    <script src="lib/p5.js"></script>
+    <script src="lib/p5.sound.js"></script>
+    <script src="lib/seedrandom.js"></script>
+    <script src="lib/transformer.js"></script>
+    <script src="lib/energyApi.js"></script>
+
+    <script type="text/javascript" src="example_data.json"></script>
+
+
+
+    <!--<link rel="stylesheet" type="text/css" href="style.css">-->
+  <style>
+    body {
+
+      padding: 50px;
+      margin: 0;
+      z-index: 1;
+      position: relative;
+      font-family: sans-serif;
+
+
+    }
+
+    canvas {
+
+      position: absolute;
+      left:0px;
+      top:0px;
+      z-index: -1;
+
+    }
+
+    h1 {
+
+      font-size: 100px
+
+    }
+
+  </style>
+    <div class="canvas">
+      <script src="objects.js"></script>
+      <script src="sketch.js"></script>
+    </div>
+
+  </head>
+  <body>
+    <div>
+      <h1>The Renewable Generation</h1>
+      <div>
+        <label>Name: </label>
+        <input id="nameInp" text="text" placeholder="e.g. John Smith" maxlength="32"/>
+      </div>
+      <div>
+      <label>State: </label>
+        <select id="stateSelect">
+            <option value="">Please choose your state</option>
+            <option value="NSW">New South Wales</option>
+            <option value="QLD">Queensland</option>
+            <option value="VIC">Victoria</option>
+            <option value="SA">South Australia</option>
+            <option value="TAS">Tasmania</option>
+            <option value="WA">Western Australia</option>
+        </select>
+    </div>
+    <br>
+    <button id="but" type="submit">Click to generate</button>
+    </div>
+  </body>
+</html>
