@@ -1,0 +1,48 @@
+{
+	"state": "NSW",
+	"totalDemand": 8962.85,
+	"treeHealth": 67.53,
+	"treeSize": 50,
+    "timeGenerated": "2020-08-17T22:45:00+10:00",
+	"supply": [{
+			"source": "Black Coal",
+			"megawatts": 8000.56,
+			"renewable": false
+		},
+		{
+			"source": "Brown Coal",
+			"megawatts": 4264.45,
+			"renewable": false
+		},
+		{
+			"source": "Gas",
+			"megawatts": 190.43,
+			"renewable": false
+		},
+		{
+			"source": "Liquid Fuel",
+			"megawatts": 0.23,
+			"renewable": false
+		},
+		{
+			"source": "Hydro",
+			"megawatts": 31,
+			"renewable": true
+		},
+		{
+			"source": "Wind",
+			"megawatts": 159.84,
+			"renewable": true
+		},
+		{
+			"source": "Small Solar",
+			"megawatts": 168,
+			"renewable": true
+		},
+		{
+			"source": "Large Solar",
+			"megawatts": 162,
+			"renewable": true
+		}
+	]
+}
