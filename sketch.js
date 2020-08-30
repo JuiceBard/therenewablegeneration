@@ -238,7 +238,7 @@ var State0_0 = {
 };
 
 function setup() {// Setup function
-    canv = createCanvas(innerWidth - 5, innerHeight - 5);       // Generate canvas
+    canv = createCanvas(innerWidth, innerHeight);       // Generate canvas
     frameRate(30);                                              // Set frame rate
 
     tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
@@ -271,8 +271,8 @@ function draw() { //Looping draw function (called each frame)
             }
         }
     } else {
-      noStroke();
-      text("Enter details to generate your tree", 0 , -100);
+//       noStroke();
+//       text("Enter details to generate your tree", 0 , -100);
 
     }
     but.mouseClicked(change_tree);
