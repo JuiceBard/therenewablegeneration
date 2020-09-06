@@ -170,18 +170,12 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
         if (des.length > 2) { // Check if any description should be shown
 
             strokeWeight(1);
-            stroke(0,0,0);
+            stroke(0);
             noFill();
-
-            // draw line from centre of circle to bottom left of border box
+        
+            rotate(-PI);
+            
             push();
-            // beginShape();
-            // // rotate(-PI);
-            // vertex(lineToCenter[0],lineToCenter[1]);
-            rotate(PI);
-            // vertex(des[3][1]-20,des[3][2]+35);
-            // endShape();
-
             // draw rectangle behind source and supply text
             fill(255,255,255);
             rect(des[3][1]-20,des[3][2]-30,200,65);
@@ -370,7 +364,7 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
 
 
         var retBranch = new branch(tf.x, tf.y, tfx, tfy, branchDepth) //Generate the return branch
-        retJoint.x = tf.x; // Set teh joint's position
+        retJoint.x = tf.x; // Set the joint's position
         retJoint.y = tf.y;
 
         this._branches = [retBranch]; // Make arrays
