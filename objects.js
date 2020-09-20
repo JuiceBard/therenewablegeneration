@@ -1,5 +1,6 @@
 var treeWidth = 4;
 var lineWidth = 2;
+
 function defaultThicknessFunction(depth) { //Global function - linear depth to thickness mapping function - default
     // The default relation
     return depth;
@@ -228,15 +229,15 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
 
     returnInfo() {
         this.createTreeImage(); // update the image
-
+        var slugAppend = this.name + " " + this.state.state + " " + this.state.timeGenerated;
+        var slugAppend = slugAppend.replace(/[ +:]/g,'-');
         var returnVal = { // create a nice object (information package)
             "img": this.img,
             "name": this.name,
+            "slug": slugAppend,
             "state": this.state.state,
-            "timeGenerated": this.state.timeGenerated
+            "time_generated": this.state.timeGenerated
         };
-
-        print(returnVal); // print the package
         return returnVal; // return the package
     }
 
