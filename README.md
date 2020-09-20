@@ -1,6 +1,4 @@
-# The
-# Renewable
-# Generation
+# The Renewable Generation
 
 ## A unique tree for you to give life to
 
