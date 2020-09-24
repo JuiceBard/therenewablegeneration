@@ -8,7 +8,15 @@ var nameInp = 0;
 var nameInputGen = false;
 var drop = null;
 var but = null;
+var email = null;
 var join = null;
+var downloadImg = null;
+var shareUrl = null;
+var shareSheet = null;
+var regenPage;
+var treeData;
+var blobUrl;
+
 
 var shouldReturnInfo = false;
 
@@ -16,6 +24,8 @@ var input_string = "";
 var item = '';
 var t, but;
 var e = new Energy();
+var imageDownloadURL = "";
+var imageDownloadName = "";
 
 var stateID = {
     "NSW": "5f2fbdd345e403dc3124eeab",
@@ -84,7 +94,6 @@ var nullState = {
     "timeGenerated": "0",
     "supply": []
 };
-var selectState = defaultState;
 
 var State1_1 = {
 
@@ -248,18 +257,26 @@ var State0_0 = {
 };
 
 
-
-function setup() {// Setup function
+function setup() {                                                  // Setup function
     canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
-    frameRate(30);                                              // Set frame rate
-
-    tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
-    tf_h = height;
-
+    if (innerWidth > innerHeight) {
+        canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
+        tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
+        tf_h = height;
+    } else {
+        tf_w = width / 2;                                           // Set value of tf_w and tf_h
+        tf_h = height;
+    }
+    frameRate(30);                                                  // Set frame rate
     but = select("#but");
     nameInp = select("#nameInp");
     drop = select("#stateSelect");
+    email = select("#email");
     join = select("#regenToggle");
+    downloadImg = select("#download-tree");
+    shareUrl = select("#share-tree");
+    shareSheet = select("#download-image-link");
+    shareSheet.hide();
 
 }
 
@@ -281,7 +298,7 @@ function draw() { //Looping draw function (called each frame)
             if (shouldReturnInfo == true) {                             //Check if we should return the tree information. This is set to True after the tree gets created (pressing generate button). This makes the program wait until the tree is fully grown and then it generates the tree image.
                 console.log("Joined the Renewable Generation")
                 t.createTreeImage();                            //Generate image
-                var treeData = t.returnInfo();                  //Return tree information
+                treeData = t.returnInfo();                  //Return tree information
                 uploadImg(treeData);
                 shouldReturnInfo = false;                       //Change to false
             }
@@ -294,6 +311,10 @@ function draw() { //Looping draw function (called each frame)
     but.mouseClicked(change_tree);
     nameInp.input(name_inp);
     drop.changed(state_select);
+    downloadImg.mouseClicked(forceDownload);
+    shareUrl.mouseClicked(shareImg);
+
+    
 }
 
 function name_inp() { //Function, that gets called when the name in the nameInp field changes
@@ -317,11 +338,15 @@ function change_tree() { //Function, that gets called when the button is pressed
     clear();                                                    // Basic preparation
     background(255);
     stroke(0);
+    
+    shareSheet.hide()
+    imageURL = "";
+    imageName = "";
 
-    translate(width / 1.5, height)
-    rotate(-PI)
+    translate(tf_w, tf_h);
+    rotate(-PI);
 
-    t = new tree(input_string, selectState, false, 8)           //generate the tree with the seed=input_string and the state
+    t = new tree(input_string, selectState, false, 8);           //generate the tree with the seed=input_string and the state
 
     t.quick_update(nullState, false);                           //Automatically set the state to the "null state" when the tree has no size
     t.lerp_update(selectState, 5);
@@ -338,28 +363,29 @@ function change_tree() { //Function, that gets called when the button is pressed
 function windowResized() {  //Function, that gets called when the window is resized
     canv = resizeCanvas(innerWidth, innerHeight);               //Resize the canvas
 
-    tf_w = width / 1.5;
-    tf_h = height;
+    if (innerWidth > innerHeight) {
+        tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
+        tf_h = height;
+    } else {
+        tf_w = width / 2;                                         // Set value of tf_w and tf_h
+        tf_h = height;
+    }
 
     if (t) { t.generate(); }                                    // The tree gets regenerated
 
     setup();                                                    // Call the setup function again
 }
 
-function mouseClicked() { //Function, that gets called when the mouse is pressed
-                                          // Call the button's built in mousePressed function
-}
-
-async function uploadImg(t) {
+async function uploadImg(imageInfo) {
     try {
         const formData = new FormData();
-        var alt = t.slug;
-        var caption = t.name + "'s tree generated on " + t.time_generated + " in " + t.state;
-        formData.append("file", t.img);
+        var alt = imageInfo.slug;
+        var caption = imageInfo.name + "'s tree generated on " + imageInfo.time_generated + " in " + imageInfo.state;
+        formData.append("file", imageInfo.img);
         formData.append("upload_preset", "RegenUpload");
         formData.append("public_id", alt);
         formData.append("context", "caption=" + caption);
-        formData.append("tags", t.state);
+        formData.append("tags", imageInfo.state);
         const response = await fetch("https://api.cloudinary.com/v1_1/the-renewable-generation/image/upload", {
             method: "post",
             body: formData,
@@ -367,9 +393,9 @@ async function uploadImg(t) {
         const json = await response.json();
         console.log("Regen Tree Uploaded");
         const imgUrl = json.secure_url;
-        t.img = imgUrl.replace("https://res.cloudinary.com/the-renewable-generation/image/upload/","https://res.cloudinary.com/the-renewable-generation/image/upload/ar_1:1,c_fill,g_auto,q_100,w_1.0/");;
-        t.state = stateID[t.state];
-        publishTree(t);
+        imageInfo.img = imgUrl.replace("https://res.cloudinary.com/the-renewable-generation/image/upload/","https://res.cloudinary.com/the-renewable-generation/image/upload/t_square/");
+        imageInfo.state = stateID[imageInfo.state];
+        publishTree(imageInfo);
         
       } catch (error) {
           console.error("Error:", error);
@@ -378,24 +404,86 @@ async function uploadImg(t) {
 
 async function publishTree(d) {
     try {
+        var imgOverlay = d.img.replace("https://res.cloudinary.com/the-renewable-generation/image/upload/t_square/","https://res.cloudinary.com/the-renewable-generation/image/upload/t_regen-overlay/");
+        var regenData = {};
+        regenData = selectState;
+        
+        imageDownloadURL = imgOverlay;
+        imageDownloadName = d.slug;
+        downloadResource();
+
         const response = await fetch("https://v1.nocodeapi.com/JuiceBard/webflow/AzoDqMdhLHoExbfH?live=true", {
             method: "post",
 	        body: JSON.stringify({
               "time-generated": d.time_generated,
               "name": d.name,
-              "slug": d.slug,
+              "slug": imageDownloadName,
+              "email": email.value(),
               "_archived": false,
               "_draft": false,
               "state-2": d.state,
-              "image-of-the-tree": d.img
+              "img": imageDownloadURL,
+              "image-of-the-tree": d.img,
+              "regen-data": JSON.stringify(regenData)
             }),
             headers: {
                 "Content-Type": "application/json",
             }
         });
         const json = await response.json();
+        regenPage = "https://the-renewable-generation.webflow.io/the-forest/" + json.slug;
         console.log("Regen Tree Published");
+        shareSheet.show();
     } catch (error) {
         console.error("Error:", error);
     }
+}
+
+function forceDownload() {
+    var blob = blobUrl;
+    var filename = imageDownloadName;
+    var a = document.createElement('a');
+    a.download = filename;
+    a.href = blob;
+    // For Firefox https://stackoverflow.com/a/32226068
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  
+  // Current blob size limit is around 500MB for browsers
+  function downloadResource() {
+    var url = imageDownloadURL;
+    var filename = imageDownloadName;
+    fetch(url, {
+        headers: new Headers({
+          'Origin': location.origin
+        }),
+        mode: 'cors'
+      })
+      .then(response => response.blob())
+      .then(blob => {
+        blobUrl = window.URL.createObjectURL(blob);
+
+      })
+      .catch(e => console.error(e));
+  }
+function shareImg() {
+    var dateGenerated = new Date(treeData.time_generated);
+    var shareMessage = "Hey checkout my ReGen tree I generated at " + dateGenerated.getHours() + ":" + dateGenerated.getMinutes() + " on " + dateGenerated.getDate() + "/" + dateGenerated.getMonth() + "/" + dateGenerated.getFullYear();
+    console.log(shareMessage);
+    if (navigator.canShare) {
+    navigator.share({
+      url: regenPage,
+      title: "Share my ReGen tree",
+      text: shareMessage,
+    })
+    .then(() => console.log('Share was successful.'))
+    .catch((error) => console.log('Sharing failed', error));
+  } else {
+    shareUrl
+    console.log(`Your system doesn't support sharing files.`);
+    console.log("Download requested");
+    
+  }
 }

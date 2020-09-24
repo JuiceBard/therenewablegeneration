@@ -9,8 +9,6 @@
     <script src="lib/transformer.js"></script>
     <script src="lib/energyApi.js"></script>
 
-    <script type="text/javascript" src="example_data.json"></script>
-
 
 
     <!--<link rel="stylesheet" type="text/css" href="style.css">-->
@@ -19,28 +17,55 @@
 
       padding: 50px;
       margin: 0;
-      z-index: 1;
+      z-index: 2;
       position: relative;
       font-family: sans-serif;
+      line-height: 2;
 
 
     }
 
     canvas {
 
-      position: absolute;
-      left:0px;
-      top:0px;
+      position: fixed;
       z-index: -1;
+      bottom: 0px;
+      left: 0%;
+      right: 0%;
 
     }
 
     h1 {
 
-      font-size: 100px
+      font-size: 100px;
+      line-height: 80px;
 
     }
 
+    .content-body {
+
+      display: none;
+
+    }
+
+    .redirect {
+      
+      z-index: 2;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      /* bring your own prefixes */
+      transform: translate(-50%, -50%);
+
+    }
+
+    .link {
+      
+      color:black;
+      font-weight: bold;
+
+    }
   </style>
     <div class="canvas">
       <script src="objects.js"></script>
@@ -49,8 +74,14 @@
 
   </head>
   <body>
-    <div>
-      <h1>The Renewable Generation</h1>
+    
+    <div class="redirect">
+      <p>For the best experience please visit:<br/><a class="link" href="https://the-renewable-generation.webflow.io"> The Renewable Generation website</a></p>
+      <button onclick="continueToGit()">No, thanks</button>
+    </div>
+    <div class="content-body">
+      <h1>The<br>Renewable<br>Generation</h1>
+      <p>For the best experience please visit:<br/><a class="link" href="https://the-renewable-generation.webflow.io"> The Renewable Generation website</a></p>
       <div>
         <label>Name: </label>
         <input id="nameInp" text="text" placeholder="e.g. John Smith" maxlength="32"/>
@@ -67,11 +98,33 @@
             <option value="WA">Western Australia</option>
         </select>
     </div>
+    <label>Email: </label>
+    <input id="email" placeholder="Enter your email"/>
     <div>
       <input id="regenToggle" type="checkbox" value="false"> Join the Renewable Generation</input>
     </div>
     <br>
     <button id="but" type="submit">Click to generate</button>
+    
+    <div id="download-image-link">
+      <button class="regen-link" id="download-tree">
+          Download my tree
+      </button>
+      <button class="regen-link" id="share-tree">
+        Share my tree
+    </button>
+    </div>
     </div>
   </body>
 </html>
+<script>
+
+  function continueToGit() {
+    
+    document.querySelector(".redirect").style.display = "none";
+    document.querySelector(".content-body").style.display = "block";
+
+  }
+
+
+</script>

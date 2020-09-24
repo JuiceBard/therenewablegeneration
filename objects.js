@@ -222,7 +222,7 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
 
     createTreeImage() {
         var canvases = document.getElementsByTagName("canvas"); // get the canvas object
-        var url = canvases[canvases.length - 1].toDataURL("image/jpeg", 1); // create the url
+        var url = canvases[canvases.length - 1].toDataURL("image/png", 1); // create the url
         this.img = url; // set the url
         return url; // return the url
     }
@@ -230,7 +230,7 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
     returnInfo() {
         this.createTreeImage(); // update the image
         var slugAppend = this.name + " " + this.state.state + " " + this.state.timeGenerated;
-        var slugAppend = slugAppend.replace(/[ +:]/g,'-');
+        var slugAppend = slugAppend.replace(/[ +:'+".,@#$%^&!|]/g,'-');
         var returnVal = { // create a nice object (information package)
             "img": this.img,
             "name": this.name,
