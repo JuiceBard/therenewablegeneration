@@ -230,7 +230,7 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
     returnInfo() {
         this.createTreeImage(); // update the image
         var slugAppend = this.name + " " + this.state.state + " " + this.state.timeGenerated;
-        var slugAppend = slugAppend.replace(/[ +:'+".,@#$%^&!|]/g,'-');
+        var slugAppend = slugAppend.replace(/[ ;:'+".,@#$%^&!()*|]/g,'-');
         var returnVal = { // create a nice object (information package)
             "img": this.img,
             "name": this.name,

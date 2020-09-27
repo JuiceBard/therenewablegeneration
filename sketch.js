@@ -17,6 +17,19 @@ var regenPage;
 var treeData;
 var blobUrl;
 
+var energyData = [];
+
+let statePop = {
+
+    "NSW":8129.0,
+    "VIC":6651.1,
+    "QLD":5130.0,
+    "SA":1759.2,
+    "WA":2639.1,
+    "TAS":537.0
+
+}
+let windAudio;
 
 var shouldReturnInfo = false;
 
@@ -24,6 +37,11 @@ var input_string = "";
 var item = '';
 var t, but;
 var e = new Energy();
+
+var loadCount = 0;
+let renewableSources = "Hydro, Wind, Large Solar, Small Solar, Battery Storage";
+let demandSources = "Demand (AEMO Operational), Demand (The AEMO don't see), Demand (Battery Charging), Demand (Pumping Hydro)";
+
 var imageDownloadURL = "";
 var imageDownloadName = "";
 
@@ -95,170 +113,15 @@ var nullState = {
     "supply": []
 };
 
-var State1_1 = {
+function preload() {
 
-    "state": "QLD",
-    "treeHealth": 100,
-    "treeSize": 100,
-    "totalDemand": 6000.85,
-    "timeGenerated": "2020-08-17T22:45:00+10:00",
-    "supply": [
-        {
-            "source": "Gas",
-            "megawatts": 190.43,
-            "renewable": false
-        },
-        {
-            "source": "Liquid Fuel",
-            "megawatts": 0.23,
-            "renewable": false
-        },
-        {
-            "source": "Hydro",
-            "megawatts": 31,
-            "renewable": true
-        },
-        {
-            "source": "Wind",
-            "megawatts": 159.84,
-            "renewable": true
-        },
-        {
-            "source": "Small Solar",
-            "megawatts": 168,
-            "renewable": true
-        },
-        {
-            "source": "Large Solar",
-            "megawatts": 162,
-            "renewable": true
-        }
-    ]
-};
-var State1_0 = {
+    windAudio = loadSound('lib/wind.mp3');
 
-    "state": "QLD",
-    "treeHealth": 100,
-    "treeSize": 0,
-    "totalDemand": 6000.85,
-    "timeGenerated": "2020-08-17T22:45:00+10:00",
-    "supply": [
-        {
-            "source": "Gas",
-            "megawatts": 190.43,
-            "renewable": false
-        },
-        {
-            "source": "Liquid Fuel",
-            "megawatts": 0.23,
-            "renewable": false
-        },
-        {
-            "source": "Hydro",
-            "megawatts": 31,
-            "renewable": true
-        },
-        {
-            "source": "Wind",
-            "megawatts": 159.84,
-            "renewable": true
-        },
-        {
-            "source": "Small Solar",
-            "megawatts": 168,
-            "renewable": true
-        },
-        {
-            "source": "Large Solar",
-            "megawatts": 162,
-            "renewable": true
-        }
-    ]
-};
-var State0_1 = {
-
-    "state": "QLD",
-    "treeHealth": 0,
-    "treeSize": 100,
-    "totalDemand": 6000.85,
-    "timeGenerated": "2020-08-17T22:45:00+10:00",
-    "supply": [
-        {
-            "source": "Gas",
-            "megawatts": 190.43,
-            "renewable": false
-        },
-        {
-            "source": "Liquid Fuel",
-            "megawatts": 0.23,
-            "renewable": false
-        },
-        {
-            "source": "Hydro",
-            "megawatts": 31,
-            "renewable": true
-        },
-        {
-            "source": "Wind",
-            "megawatts": 159.84,
-            "renewable": true
-        },
-        {
-            "source": "Small Solar",
-            "megawatts": 168,
-            "renewable": true
-        },
-        {
-            "source": "Large Solar",
-            "megawatts": 162,
-            "renewable": true
-        }
-    ]
-};
-var State0_0 = {
-
-    "state": "QLD",
-    "treeHealth": 0,
-    "treeSize": 0,
-    "totalDemand": 6000.85,
-    "timeGenerated": "2020-08-17T22:45:00+10:00",
-    "supply": [
-        {
-            "source": "Gas",
-            "megawatts": 190.43,
-            "renewable": false
-        },
-        {
-            "source": "Liquid Fuel",
-            "megawatts": 0.23,
-            "renewable": false
-        },
-        {
-            "source": "Hydro",
-            "megawatts": 31,
-            "renewable": true
-        },
-        {
-            "source": "Wind",
-            "megawatts": 159.84,
-            "renewable": true
-        },
-        {
-            "source": "Small Solar",
-            "megawatts": 168,
-            "renewable": true
-        },
-        {
-            "source": "Large Solar",
-            "megawatts": 162,
-            "renewable": true
-        }
-    ]
-};
-
+}
 
 function setup() {                                                  // Setup function
-    canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
+    canv = createCanvas(innerWidth, innerHeight);                   // Generate canvas
+
     if (innerWidth > innerHeight) {
         canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
         tf_w = width / 1.5;                                         // Set value of tf_w and tf_h
@@ -267,7 +130,9 @@ function setup() {                                                  // Setup fun
         tf_w = width / 2;                                           // Set value of tf_w and tf_h
         tf_h = height;
     }
+
     frameRate(30);                                                  // Set frame rate
+
     but = select("#but");
     nameInp = select("#nameInp");
     drop = select("#stateSelect");
@@ -309,6 +174,7 @@ function draw() { //Looping draw function (called each frame)
 
     }
     but.mouseClicked(change_tree);
+    //but.mouseClicked(updateData);
     nameInp.input(name_inp);
     drop.changed(state_select);
     downloadImg.mouseClicked(forceDownload);
@@ -323,21 +189,24 @@ function name_inp() { //Function, that gets called when the name in the nameInp 
 
 function state_select() { //Function, that gets called when the selected drop-down menu item gets changed
     item = this.value();                                        //Set the global variable item to the selected value
-
-    e.update();                                                 //Update the global Energy object
+                                                                //Update the global Energy object
 
     if (item == '') { selectState = defaultState }              //The tree's selected state is set to default state if there is no special selection
     else {
-        selectState = e[item];                                  //Otherwise get the value from the Energy object of the same name as the selected item
+        selectState = findObjectByKey(energyData, "state", item);  //Otherwise get the value from the Energy object of the same name as the selected item
     }
-
-    t.lerp_update(selectState, 3);                              //The tree gets updated into the right state
+    console.log(selectState);
+    if (t) { t.lerp_update(selectState, 3); }                    //The tree gets updated into the right state
+                                  
 }
 
 function change_tree() { //Function, that gets called when the button is pressed
     clear();                                                    // Basic preparation
     background(255);
     stroke(0);
+    updateData();
+    
+    windAudio.play();
     
     shareSheet.hide()
     imageURL = "";
@@ -349,15 +218,17 @@ function change_tree() { //Function, that gets called when the button is pressed
     t = new tree(input_string, selectState, false, 8);           //generate the tree with the seed=input_string and the state
 
     t.quick_update(nullState, false);                           //Automatically set the state to the "null state" when the tree has no size
-    t.lerp_update(selectState, 5);
+    t.lerp_update(selectState, 5);                              // Update into the selected state
     
     if (join.checked()) {
-        shouldReturnInfo = true;
+        shouldReturnInfo = true;                                // Return the info after the tree grows       
       } else {
         shouldReturnInfo = false;
-      }                                                         // Update into the selected state
+    }                                                         
 
-                                                                // Return the info after the tree grows                                       
+    
+
+                                                                                                
 }
 
 function windowResized() {  //Function, that gets called when the window is resized
@@ -486,4 +357,78 @@ function shareImg() {
     console.log("Download requested");
     
   }
+}
+
+function updateData() {
+    e.update()
+        .then(() => loadCount++)
+        .then(() => {
+
+
+            for (let state in e.states) { // state will be each of the keys: ie, NSW, QLD, etc
+                let treeHealth;
+                let totalStateDemand = 0;;
+                let supplyData = [];
+                let renewables = 0;
+                let treeSize;
+                let totalPopulation = 0;
+                let treeSizeByPopMapped;
+                
+                for (let fuel in e.states[state]) { // fuel will be each fuel type in that given state
+
+                    let value = e[state][fuel]; // this is synonymous with energy.states[state][fuel]. That's how getters work!
+                    if (renewableSources.includes(fuel)) {
+                      renewables += value;
+                    } else if (demandSources.includes(fuel)){
+                        totalStateDemand += value;
+                    }
+                    // let id = "#" + state + " " + fuel;
+                    // let col = select(id);
+
+                    if (value != 0 && !demandSources.includes(fuel)) {
+                        //col.style('color', 'red');
+                        
+                        supplyData.push({"source":fuel, "megawatts":value});
+                        //col.html(value.toFixed(2));
+                    }
+
+                }
+                let allStateDemand = 0;
+                for (let state in e.states) {
+                    for (let fuel in e.states[state]) { // fuel will be each fuel type in that given state
+                        let value = e[state][fuel];
+                        if (demandSources.includes(fuel)) {
+                            allStateDemand += value;
+                        }
+
+                    }
+                    totalPopulation += statePop[state];
+                }
+
+                treeHealth = (renewables/totalStateDemand) * 100;
+                treeSize = (totalStateDemand/allStateDemand) * 100;
+                
+
+                //   col = select("#" + state + " " + "Tree Size Demand");
+                //   col.html(treeSize.toFixed(2) + "%");
+
+                treeSizeByPopMapped = map(totalStateDemand/(statePop[state]),0,allStateDemand/totalPopulation, 100, 20, true);
+
+                energyData.push({"state":state, "treeHealth":treeHealth, "treeSize": treeSizeByPopMapped, "totalDemand": totalStateDemand, "timeGenerated": new Date(), "supply":supplyData});
+                
+                
+            }
+        })
+        .then(() => console.log("Updated!"));
+
+
+}
+
+function findObjectByKey(array, key, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][key] === value) {
+            return array[i];
+        }
+    }
+    return null;
 }
