@@ -171,7 +171,7 @@ function draw() { //Looping draw function (called each frame)
                 treeData = t.returnInfo();                  //Return tree information
                 uploadImg(treeData);
                 shouldReturnInfo = false;                       //Change to false
-                but.html("Now Planting...");
+                but.html("Now planting...");
             }
         }
     } else {
