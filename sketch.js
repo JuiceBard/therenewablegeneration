@@ -116,7 +116,7 @@ var selectState = null;
 
 function preload() {
 
-    windAudio = createAudio('lib/Wind.m4a');
+    windAudio = createAudio('https://juicebard.github.io/therenewablegeneration/lib/Wind.m4a');
     updateData();
 
 }
