@@ -193,7 +193,7 @@ class tree { // A tree object - stores the trunk (trunks and all the _joints)
 
         }
 
-        this.sway += 0.03; // Increse the sway clock
+        this.sway += 0.015; // Increse the sway clock
     }
 
     drawLine(col = [0, 0, 0], thicknessFunction = defaultThicknessFunction, sway = this.sway) { //Very similar to branchJoint.drawline()
