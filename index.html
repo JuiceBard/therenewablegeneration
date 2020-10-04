@@ -66,6 +66,12 @@
       font-weight: bold;
 
     }
+
+    #success-message {
+
+      display: none;
+
+    }
   </style>
     <div class="canvas">
       <script src="objects.js"></script>
@@ -89,7 +95,7 @@
       <div>
       <label>State: </label>
         <select id="stateSelect">
-            <option value="">Please choose your state</option>
+            <option value="-">Please choose your state</option>
             <option value="NSW">New South Wales</option>
             <option value="QLD">Queensland</option>
             <option value="VIC">Victoria</option>
@@ -105,7 +111,7 @@
     </div>
     <br>
     <button id="but" type="submit">Click to generate</button>
-    
+    <p id="success-message">Success!</p>
     <div id="download-image-link">
       <button class="regen-link" id="download-tree">
           Download my tree

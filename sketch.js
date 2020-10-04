@@ -40,7 +40,6 @@ var e = new Energy();
 
 var loadCount = 0;
 let renewableSources = "Hydro, Wind, Large Solar, Small Solar, Battery Storage";
-let demandSources = "Demand (AEMO Operational), Demand (The AEMO don't see), Demand (Battery Charging), Demand (Pumping Hydro)";
 
 var imageDownloadURL = "";
 var imageDownloadName = "";
@@ -113,14 +112,19 @@ var nullState = {
     "supply": []
 };
 
+var selectState = null;
+
 function preload() {
 
-    windAudio = loadSound('lib/wind.mp3');
+    windAudio = createAudio('lib/Wind.m4a');
+    updateData();
 
 }
 
 function setup() {                                                  // Setup function
     canv = createCanvas(innerWidth, innerHeight);                   // Generate canvas
+
+    setInterval(updateData, Energy.recommendedDelay);
 
     if (innerWidth > innerHeight) {
         canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
@@ -152,6 +156,7 @@ function draw() { //Looping draw function (called each frame)
     background(255);
     stroke(0);
 
+
     translate(tf_w, tf_h);                                      //Set the origin to be at tf_w, tf_h and to be pointing up (not accounted for Transformer)
 
 
@@ -161,11 +166,12 @@ function draw() { //Looping draw function (called each frame)
 
         if (frameCount > t.transition.endFrame) {               // Check if the tree is not in the middle of an animation
             if (shouldReturnInfo == true) {                             //Check if we should return the tree information. This is set to True after the tree gets created (pressing generate button). This makes the program wait until the tree is fully grown and then it generates the tree image.
-                console.log("Joined the Renewable Generation")
+                console.log("Joined the Renewable Generation");
                 t.createTreeImage();                            //Generate image
                 treeData = t.returnInfo();                  //Return tree information
                 uploadImg(treeData);
                 shouldReturnInfo = false;                       //Change to false
+                but.html("Now Planting...");
             }
         }
     } else {
@@ -174,7 +180,6 @@ function draw() { //Looping draw function (called each frame)
 
     }
     but.mouseClicked(change_tree);
-    //but.mouseClicked(updateData);
     nameInp.input(name_inp);
     drop.changed(state_select);
     downloadImg.mouseClicked(forceDownload);
@@ -185,18 +190,17 @@ function draw() { //Looping draw function (called each frame)
 
 function name_inp() { //Function, that gets called when the name in the nameInp field changes
     input_string = this.value();                                //Set the global variable input_string to the written value
+    if(t){but.html("Regenerate my tree");}
+    
 }
 
 function state_select() { //Function, that gets called when the selected drop-down menu item gets changed
     item = this.value();                                        //Set the global variable item to the selected value
                                                                 //Update the global Energy object
-
-    if (item == '') { selectState = defaultState }              //The tree's selected state is set to default state if there is no special selection
-    else {
-        selectState = findObjectByKey(energyData, "state", item);  //Otherwise get the value from the Energy object of the same name as the selected item
-    }
-    console.log(selectState);
-    if (t) { t.lerp_update(selectState, 3); }                    //The tree gets updated into the right state
+    if(t){but.html("Regenerate my tree");}
+    selectState = findObjectByKey(energyData, "state", item);  //Otherwise get the value from the Energy object of the same name as the selected item
+    // console.log(selectState);
+    // if (t) { t.lerp_update(selectState, 3); }                    //The tree gets updated into the right state
                                   
 }
 
@@ -205,8 +209,10 @@ function change_tree() { //Function, that gets called when the button is pressed
     background(255);
     stroke(0);
     updateData();
-    
-    windAudio.play();
+    nameInp.style("border-style","none none solid");
+    nameInp.style("border-bottom","2px solid #333");
+    drop.style("border-style","none none solid");
+    drop.style("border-bottom","2px solid #333");
     
     shareSheet.hide()
     imageURL = "";
@@ -214,12 +220,29 @@ function change_tree() { //Function, that gets called when the button is pressed
 
     translate(tf_w, tf_h);
     rotate(-PI);
+    if (selectState != null && input_string != "") {
 
-    t = new tree(input_string, selectState, false, 8);           //generate the tree with the seed=input_string and the state
+        t = new tree(input_string, selectState, false, 8);           //generate the tree with the seed=input_string and the state
+        windAudio.loop(true);
+        windAudio.autoplay(true);
+        console.log("Started playing");
+        but.html("Generated");
+        t.quick_update(nullState, false);                           //Automatically set the state to the "null state" when the tree has no size
+        t.lerp_update(selectState, 5);                              // Update into the selected state
 
-    t.quick_update(nullState, false);                           //Automatically set the state to the "null state" when the tree has no size
-    t.lerp_update(selectState, 5);                              // Update into the selected state
-    
+    } else {
+        if (!input_string) {
+        
+        nameInp.style("border","2px solid lime");
+
+        }
+        if (!selectState){
+
+        drop.style("border","2px solid lime");
+        
+        }
+
+    }
     if (join.checked()) {
         shouldReturnInfo = true;                                // Return the info after the tree grows       
       } else {
@@ -305,6 +328,8 @@ async function publishTree(d) {
         regenPage = "https://the-renewable-generation.webflow.io/the-forest/" + json.slug;
         console.log("Regen Tree Published");
         shareSheet.show();
+        join.checked = false;
+        but.html("Planted");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -364,8 +389,8 @@ function updateData() {
         .then(() => loadCount++)
         .then(() => {
 
-
-            for (let state in e.states) { // state will be each of the keys: ie, NSW, QLD, etc
+            energyData = [];
+            for (let state in e.states) {                           // state will be each of the keys: ie, NSW, QLD, etc
                 let treeHealth;
                 let totalStateDemand = 0;;
                 let supplyData = [];
@@ -374,20 +399,19 @@ function updateData() {
                 let totalPopulation = 0;
                 let treeSizeByPopMapped;
                 
-                for (let fuel in e.states[state]) { // fuel will be each fuel type in that given state
+                for (let fuel in e.states[state]) {                 // fuel will be each fuel type in that given state
 
-                    let value = e[state][fuel]; // this is synonymous with energy.states[state][fuel]. That's how getters work!
+                    let value = e[state][fuel];                     // this is synonymous with energy.states[state][fuel]. That's how getters work!
                     if (renewableSources.includes(fuel)) {
                       renewables += value;
-                    } else if (demandSources.includes(fuel)){
+                    } else if (fuel.includes("Demand")){
                         totalStateDemand += value;
                     }
                     // let id = "#" + state + " " + fuel;
                     // let col = select(id);
 
-                    if (value != 0 && !demandSources.includes(fuel)) {
+                    if (value != 0 && !fuel.includes("Demand")) {
                         //col.style('color', 'red');
-                        
                         supplyData.push({"source":fuel, "megawatts":value});
                         //col.html(value.toFixed(2));
                     }
@@ -397,7 +421,7 @@ function updateData() {
                 for (let state in e.states) {
                     for (let fuel in e.states[state]) { // fuel will be each fuel type in that given state
                         let value = e[state][fuel];
-                        if (demandSources.includes(fuel)) {
+                        if (fuel.includes("Demand")) {
                             allStateDemand += value;
                         }
 
@@ -412,14 +436,22 @@ function updateData() {
                 //   col = select("#" + state + " " + "Tree Size Demand");
                 //   col.html(treeSize.toFixed(2) + "%");
 
-                treeSizeByPopMapped = map(totalStateDemand/(statePop[state]),0,allStateDemand/totalPopulation, 100, 20, true);
-
+                treeSizeByPopMapped = map((totalStateDemand/statePop[state]) * 100,0, (allStateDemand/totalPopulation) * 100, 0, 50, false);
+                if (treeSizeByPopMapped > 100) {treeSizeByPopMapped=100;}
+                // console.log((totalStateDemand/statePop[state])*100 + "---" + allStateDemand/totalPopulation*100 + "===" + treeSizeByPopMapped);
                 energyData.push({"state":state, "treeHealth":treeHealth, "treeSize": treeSizeByPopMapped, "totalDemand": totalStateDemand, "timeGenerated": new Date(), "supply":supplyData});
                 
                 
             }
         })
-        .then(() => console.log("Updated!"));
+        .then(() => console.log("Updated!"))
+        .then(() => {
+            if (t) {
+                selectState = findObjectByKey(energyData, "state", drop.value());
+                console.log(selectState);
+                t.lerp_update(selectState, 5);
+            }
+        });
 
 
 }
