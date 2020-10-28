@@ -113,6 +113,8 @@ var nullState = {
 };
 
 var selectState = null;
+var errorResponse;
+var errorResponseDiv;
 
 function preload() {
 
@@ -143,7 +145,10 @@ function setup() {                                                  // Setup fun
     downloadImg = select("#download-tree");
     shareUrl = select("#share-tree");
     shareSheet = select("#download-image-link");
+    errorResponse = select("#error");
+    errorResponseDiv = select("#errorWrap");
     shareSheet.hide();
+    errorResponseDiv.hide();
 
 }
 
@@ -206,7 +211,7 @@ function change_tree() { //Function, that gets called when the button is pressed
     clear();                                                    // Basic preparation
     background(255);
     stroke(0);
- 
+    errorResponseDiv.hide();
     nameInp.style("border-style","none none solid");
     nameInp.style("border-bottom","2px solid #333");
     drop.style("border-style","none none solid");
@@ -231,12 +236,16 @@ function change_tree() { //Function, that gets called when the button is pressed
     } else {
         if (!input_string) {
         
-        nameInp.style("border","2px solid lime");
+            errorResponseDiv.show();
+            errorResponse.html("name");
+            nameInp.style("border","2px solid lime");
 
         }
         if (!selectState){
-
-        drop.style("border","2px solid lime");
+        
+            errorResponseDiv.show();
+            errorResponse.html("state");
+            drop.style("border","2px solid lime");
         
         }
 
