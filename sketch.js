@@ -117,14 +117,12 @@ var selectState = null;
 function preload() {
 
     windAudio = createAudio('https://juicebard.github.io/therenewablegeneration/lib/Wind.m4a');
-    updateData();
+    setInterval(updateData, Energy.recommendedDelay);
 
 }
 
 function setup() {                                                  // Setup function
     canv = createCanvas(innerWidth, innerHeight);                   // Generate canvas
-
-    setInterval(updateData, Energy.recommendedDelay);
 
     if (innerWidth > innerHeight) {
         canv = createCanvas(innerWidth, innerHeight);               // Generate canvas
@@ -208,7 +206,7 @@ function change_tree() { //Function, that gets called when the button is pressed
     clear();                                                    // Basic preparation
     background(255);
     stroke(0);
-    updateData();
+ 
     nameInp.style("border-style","none none solid");
     nameInp.style("border-bottom","2px solid #333");
     drop.style("border-style","none none solid");
