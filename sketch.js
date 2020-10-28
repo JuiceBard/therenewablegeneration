@@ -118,7 +118,7 @@ function preload() {
 
     windAudio = createAudio('https://juicebard.github.io/therenewablegeneration/lib/Wind.m4a');
     setInterval(updateData, Energy.recommendedDelay);
-
+    updateData();
 }
 
 function setup() {                                                  // Setup function
@@ -199,7 +199,7 @@ function state_select() { //Function, that gets called when the selected drop-do
     selectState = findObjectByKey(energyData, "state", item);  //Otherwise get the value from the Energy object of the same name as the selected item
     // console.log(selectState);
     // if (t) { t.lerp_update(selectState, 3); }                    //The tree gets updated into the right state
-                                  
+                                 
 }
 
 function change_tree() { //Function, that gets called when the button is pressed
